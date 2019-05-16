@@ -30,24 +30,22 @@ def softmax(array):
 
 
 def print_params(list_params):
-    print '+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++'
-    for i in xrange(1, len(sys.argv)):
-        print list_params[i - 1] + '= ' + sys.argv[i]
-    print '+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++'
+    print('+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++')
+    for i in range(1, len(sys.argv)):
+        print(list_params[i - 1] + '= ' + sys.argv[i])
+    print('+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++')
 
 
 def select_batch(shuffle, batch_size, it, total_size):
     batch = shuffle[it:min(it + batch_size, total_size)]
     if min(it + batch_size, total_size) == total_size or total_size == it + batch_size:
-        shuffle = np.asarray(random.sample(xrange(total_size), total_size))
-        # print "in", shuffle
+        shuffle = np.asarray(random.sample(range(total_size), total_size))
         it = 0
         if len(batch) < batch_size:
             diff = batch_size - len(batch)
             batch_c = shuffle[it:it + diff]
             batch = np.concatenate((batch, batch_c))
             it = diff
-            # print 'c', batch_c, batch, it
     else:
         it += batch_size
     return shuffle, batch, it
@@ -60,16 +58,13 @@ def define_multinomial_probs(values, diff_prob=2):
     max_prob = general_prob * diff_prob  # for values
 
     probs = np.full(interval_size, (1.0 - max_prob * len(values)) / float(interval_size - len(values)))
-    for i in xrange(len(values)):
+    for i in range(len(values)):
         probs[values[i] - values[0]] = max_prob
 
     return probs
 
 
 def normalize_images(data, mean_full, std_full):
-    # print(training_data.shape)
-    # print(test_data.shape)
-
     data[:, :, :, 0] = np.subtract(data[:, :, :, 0], mean_full[0])
     data[:, :, :, 1] = np.subtract(data[:, :, :, 1], mean_full[1])
     data[:, :, :, 2] = np.subtract(data[:, :, :, 2], mean_full[2])
@@ -78,12 +73,6 @@ def normalize_images(data, mean_full, std_full):
     data[:, :, :, 1] = np.divide(data[:, :, :, 1], std_full[1])
     data[:, :, :, 2] = np.divide(data[:, :, :, 2], std_full[2])
 
-
-# for i in range(len(data)):
-# data[i] = np.subtract(data[i], mean_full)
-# data[i] = np.divide(data[i], std_full)
-
-# print(training_data[0][0])
 
 def compute_image_mean(data):
     mean_full = np.mean(np.mean(np.mean(data, axis=0), axis=0), axis=0)
@@ -99,12 +88,11 @@ def load_imgs_torch(files):
     count_files = 0
     mark_files = 0
     for f in files:
-        # print f
         i = 0
         try:
             file_in = open(f)
         except IOError:
-            print BatchColors.FAIL + "Could not open file " + f + BatchColors.ENDC
+            print(BatchColors.FAIL + "Could not open file " + f + BatchColors.ENDC)
 
         for line in file_in:
             if i == 7:
@@ -119,9 +107,6 @@ def load_imgs_torch(files):
                 img_data[count_files, :, :, :] = arr_hwc
             else:
                 mask_data[count_files, :, :] = np.floor(arr_hwc + 0.5)
-                # print f
-                # print np.floor(arr_hwc+0.5).astype(int).flatten().shape
-                # print np.bincount(np.floor(arr_hwc+0.5).astype(int).flatten())
                 count_files = count_files + 1
         mark_files = mark_files + 1
 
@@ -130,7 +115,6 @@ def load_imgs_torch(files):
 
 def load_images_torch(path):
     files = []
-    # masks = []
 
     for f in listdir(path):
         if "txt" in f and (f != "Thumbs.db" and "jpeg" not in f):
@@ -146,15 +130,13 @@ def create_crops(data, mask_data, crop_size, is_train, data_aug=True, data_aug_e
     crops_class = []
     pos = []
 
-    for i in xrange(len(data)):
-        for j in xrange(0, len(data[i]) - 1, crop_size):
+    for i in range(len(data)):
+        for j in range(0, len(data[i]) - 1, crop_size):
             for k in range(0, len(data[i][j]) - 1, crop_size):
-                # print j, k
-
                 # Crop
                 crop = data[i, j:j + crop_size, k:k + crop_size, :]
                 if len(crop) != crop_size or len(crop[0]) != crop_size:
-                    print crop.size
+                    print(crop.size)
                 crops_data.append(crop)
 
                 # Class
@@ -185,8 +167,6 @@ def create_crops(data, mask_data, crop_size, is_train, data_aug=True, data_aug_e
                     current_pos[1] = int(k)
                     pos.append(current_pos)
 
-    # print len(crops_data)
-    # print len(crops_class)
     if is_train is True:
         return np.asarray(crops_data), np.asarray(crops_class, dtype=np.int32)
     else:
@@ -198,22 +178,18 @@ def create_crops_stride(data, mask_data, crop_size, stride=1, is_train=False, da
     crops_class = []
     pos = []
 
-    for i in xrange(len(data)):
+    for i in range(len(data)):
         j = 0
         count_x = 0
-        while j < len(data[i]):  # for j in xrange(0,len(data[i]),stride):
+        while j < len(data[i]):  # for j in range(0,len(data[i]),stride):
             k = 0
             count_y = 0
-            while k < len(data[i][j]):  # for k in xrange(0,len(data[i][j]),stride):
-
+            while k < len(data[i][j]):  # for k in range(0,len(data[i][j]),stride):
                 if j + crop_size <= len(data[i]) and k + crop_size <= len(data[i][j]):
-                    # print j, k
-                    # print j, j+crop_size
-                    # print k, k+crop_size
                     # Crop
                     crop = data[i, j:j + crop_size, k:k + crop_size, :]
                     if len(crop) != crop_size or len(crop[0]) != crop_size:
-                        print crop.size
+                        print(crop.size)
                     crops_data.append(crop)
 
                     # Class
@@ -277,8 +253,6 @@ def dynamically_create_patches(data, mask_data, crop_size, class_distribution, s
         cur_map = class_distribution[cur_pos][0]
         cur_x = class_distribution[cur_pos][1][0]
         cur_y = class_distribution[cur_pos][1][1]
-        # curTransform = class_distribution[cur_pos][2]
-        # print cur_map, cur_x, cur_y, curTransform, mask
 
         patch = data[cur_map, cur_x:cur_x + crop_size, cur_y:cur_y + crop_size, :]
         current_class = mask_data[cur_map, cur_x:cur_x + crop_size, cur_y:cur_y + crop_size]
@@ -298,12 +272,12 @@ def dynamically_create_patches(data, mask_data, crop_size, class_distribution, s
                             cur_y - (crop_size - len(current_class[0])):cur_y + crop_size]
 
         if len(patch) != crop_size or len(patch[0]) != crop_size:
-            print "Error: Current patch size ", len(patch), len(patch[0])
-            print cur_x, (crop_size - len(patch)), cur_x - (crop_size - len(patch)), cur_x + crop_size, cur_y, (
-                crop_size - len(patch[0])), cur_y - (crop_size - len(patch[0])), cur_y + crop_size
+            print("Error: Current patch size ", len(patch), len(patch[0]))
+            print(cur_x, (crop_size - len(patch)), cur_x - (crop_size - len(patch)), cur_x + crop_size, cur_y, (
+                crop_size - len(patch[0])), cur_y - (crop_size - len(patch[0])), cur_y + crop_size)
             return
         if len(current_class) != crop_size or len(current_class[0]) != crop_size:
-            print "Error: Current class size ", len(current_class), len(current_class[0])
+            print("Error: Current class size ", len(current_class), len(current_class[0]))
             return
 
         if i < len(class_distribution):
@@ -325,31 +299,23 @@ def create_patches_per_map(data, mask_data, crop_size, stride_crop, index, batch
     pos = []
 
     h, w, c = data.shape
-    # h_m, w_m, c_m = mask_data.shape
     total_index = (int(((h - crop_size) / stride_crop)) + 1 if ((h - crop_size) % stride_crop) == 0 else int(
         ((h - crop_size) / stride_crop)) + 2)
 
     count = 0
-    # offset_h = int(((index*batch_size*stride_crop)/((w-crop_size)))*stride_crop)
-    # offset_h = int((index*batch_size)/(((h-crop_size)/stride_crop)+1))*stride_crop
-    # offset_w = int((index*batch_size)%(((w-crop_size)/stride_crop)+1))*stride_crop
-
     offset_h = int((index * batch_size) / total_index) * stride_crop
     offset_w = int((index * batch_size) % total_index) * stride_crop
     first = True
 
-    # print offset_h, offset_w, h-crop_size, (h-crop_size+1 if ((h-crop_size)%stride_crop) == 0 else h-crop_size+2)
-
-    for j in xrange(offset_h, total_index * stride_crop, stride_crop):
+    for j in range(offset_h, total_index * stride_crop, stride_crop):
         if first is False:
             offset_w = 0
-        for k in xrange(offset_w, total_index * stride_crop, stride_crop):
+        for k in range(offset_w, total_index * stride_crop, stride_crop):
             if first is True:
                 first = False
             cur_x = j
             cur_y = k
 
-            # print cur_x, cur_y, cur_x+crop_size, cur_y+crop_size, data[cur_x:cur_x+crop_size, cur_y:cur_y+crop_size,:]
             patch = data[cur_x:cur_x + crop_size, cur_y:cur_y + crop_size, :]
 
             if len(patch) != crop_size and len(patch[0]) != crop_size:
@@ -364,13 +330,12 @@ def create_patches_per_map(data, mask_data, crop_size, stride_crop, index, batch
                 patch = data[cur_x:cur_x + crop_size, cur_y:cur_y + crop_size, :]
 
             if len(patch) != crop_size or len(patch[0]) != crop_size:
-                print "Error: Current patch size ", len(patch), len(patch[0])
+                print("Error: Current patch size ", len(patch), len(patch[0]))
 
             count += 1
             patches.append(patch)
             cur_mask_patch = mask_data[cur_x:cur_x + crop_size, cur_y:cur_y + crop_size]
             classes.append(cur_mask_patch)
-            # print cur_x, cur_y, cur_x+crop_size, cur_y+crop_size, patch.shape, cur_mask_patch.shape
 
             current_pos = np.zeros(2)
             current_pos[0] = int(cur_x)
@@ -378,11 +343,9 @@ def create_patches_per_map(data, mask_data, crop_size, stride_crop, index, batch
             pos.append(current_pos)
 
             if count == batch_size:  # when completes the batch
-                # print "--------- batch complete"
                 return np.asarray(patches), np.asarray(classes, dtype=np.int32), pos
 
     # when its not the total size of the batch
-    # print "--------- end without batch complete"
     return np.asarray(patches), np.asarray(classes, dtype=np.int32), pos
 
 
@@ -395,11 +358,11 @@ def create_mean_and_std(training_data, training_mask_data, crop_size, stride_cro
 def create_distributions_over_classes(labels, crop_size, stride_crop):
     classes = [[[] for i in range(0)] for i in range(NUM_CLASSES)]
 
-    for k in xrange(len(labels)):
+    for k in range(len(labels)):
         w, h, c = labels[k].shape
 
-        for i in xrange(0, w, stride_crop):
-            for j in xrange(0, h, stride_crop):
+        for i in range(0, w, stride_crop):
+            for j in range(0, h, stride_crop):
                 patch_class = np.squeeze(labels[k][i:i + crop_size, j:j + crop_size])
 
                 if patch_class.shape == (crop_size, crop_size):
@@ -415,16 +378,13 @@ def create_prediction_map(path, all_predcs, pos, step, crop_size):
     for i in range(len(all_predcs)):
         im_array[pos[i][1]:pos[i][1] + crop_size, pos[i][0]:pos[i][0] + crop_size] = all_predcs[i, :, :]
 
-    # print np.bincount(im_array.flatten())
-
-    # scipy.misc.imsave(path + 'fcn/tensorflow_predMap_step' + str(step) + '.jpeg', im_array)
     img = Image.fromarray(np.uint8(im_array * 255))
     img.save(path + 'predMap_step' + str(step) + '.jpeg')
 
 
 def save_map(path, step, prob_im_argmax):
     img = Image.fromarray(np.uint8(prob_im_argmax * 255))
-    img.save(path + 'predMap_step' + str(step) + '.jpeg')
+    img.save(path + 'pred_map_step' + str(step) + '.jpeg')
 
 
 def calc_accuracy_by_crop(true_crop, pred_crop, track_conf_matrix):
@@ -433,18 +393,20 @@ def calc_accuracy_by_crop(true_crop, pred_crop, track_conf_matrix):
 
     acc = 0
     local_conf_matrix = np.zeros((NUM_CLASSES, NUM_CLASSES), dtype=np.uint32)
-    # count = 0
-    for i in xrange(b):
-        for j in xrange(h):
-            for k in xrange(w):
-                # count += 1
+    for i in range(b):
+        for j in range(h):
+            for k in range(w):
                 if _trueCrop[i][j][k] == pred_crop[i][j][k]:
                     acc = acc + 1
                 track_conf_matrix[_trueCrop[i][j][k]][pred_crop[i][j][k]] += 1
                 local_conf_matrix[_trueCrop[i][j][k]][pred_crop[i][j][k]] += 1
 
-    # print 'count', count
-    return acc, local_conf_matrix
+    _sum = 0.0
+    for i in range(len(local_conf_matrix)):
+        _sum += (local_conf_matrix[i][i] / float(np.sum(local_conf_matrix[i])) if np.sum(local_conf_matrix[i]) != 0 else 0)
+    acc_norm = _sum / float(NUM_CLASSES)
+
+    return acc, acc_norm, local_conf_matrix
 
 
 def calc_accuracy_by_map(test_mask_data, prob_im_argmax):
@@ -452,25 +414,22 @@ def calc_accuracy_by_map(test_mask_data, prob_im_argmax):
     acc = 0
     conf_matrix = np.zeros((NUM_CLASSES, NUM_CLASSES), dtype=np.uint32)
 
-    for i in xrange(b):
-        for j in xrange(h):
-            for k in xrange(w):
+    for i in range(b):
+        for j in range(h):
+            for k in range(w):
                 # count += 1
                 if test_mask_data[i][j][k][0] == prob_im_argmax[j][k]:
                     acc = acc + 1
                 conf_matrix[test_mask_data[i][j][k][0]][prob_im_argmax[j][k]] += 1
 
-    # print 'count', count
     return acc, conf_matrix
 
 
 def select_best_patch_size(distribution_type, values, patch_acc_loss, patch_occur, is_loss_or_acc='acc',
                            patch_chosen_values=None,
                            debug=False):
-    # if 0 in patch_occur:
     patch_occur[np.where(patch_occur == 0)] = 1
     patch_mean = patch_acc_loss / patch_occur
-    # print is_loss_or_acc
 
     if is_loss_or_acc == 'acc':
         argmax_acc = np.argmax(softmax(patch_mean))
@@ -483,46 +442,46 @@ def select_best_patch_size(distribution_type, values, patch_acc_loss, patch_occu
             patch_chosen_values[int(argmax_acc)] += 1
 
         if debug is True:
-            print 'errorLoss', patch_acc_loss
-            print 'patch_occur', patch_occur
-            print 'patch_mean', patch_mean
-            print 'argmax_acc', argmax_acc
+            print('errorLoss', patch_acc_loss)
+            print('patch_occur', patch_occur)
+            print('patch_mean', patch_mean)
+            print('argmax_acc', argmax_acc)
 
-            print 'specific', argmax_acc, patch_acc_loss[argmax_acc], patch_occur[argmax_acc], patch_mean[argmax_acc]
+            print('specific', argmax_acc, patch_acc_loss[argmax_acc], patch_occur[argmax_acc], patch_mean[argmax_acc])
 
     elif is_loss_or_acc == 'loss':
         arg_sort_out = np.argsort(patch_mean)
 
         if debug is True:
-            print 'errorLoss', patch_acc_loss
-            print 'patch_occur', patch_occur
-            print 'patch_mean', patch_mean
-            print 'arg_sort_out', arg_sort_out
+            print('errorLoss', patch_acc_loss)
+            print('patch_occur', patch_occur)
+            print('patch_mean', patch_mean)
+            print('arg_sort_out', arg_sort_out)
         if distribution_type == 'multi_fixed':
-            for i in xrange(len(values)):
+            for i in range(len(values)):
                 if patch_occur[arg_sort_out[i]] > 0:
                     cur_val = int(values[arg_sort_out[i]])  # -1*(i+1)
                     if patch_chosen_values is not None:
                         patch_chosen_values[arg_sort_out[i]] += 1
                     if debug is True:
-                        print 'specific', arg_sort_out[i], patch_acc_loss[arg_sort_out[i]], \
-                            patch_occur[arg_sort_out[i]], patch_mean[arg_sort_out[i]]
+                        print('specific', arg_sort_out[i], patch_acc_loss[arg_sort_out[i]], \
+                            patch_occur[arg_sort_out[i]], patch_mean[arg_sort_out[i]])
                     break
         elif distribution_type == 'uniform' or distribution_type == 'multinomial':
-            for i in xrange(values[-1] - values[0] + 1):
+            for i in range(values[-1] - values[0] + 1):
                 if patch_occur[arg_sort_out[i]] > 0:
                     cur_val = values[0] + arg_sort_out[i]
                     if patch_chosen_values is not None:
                         patch_chosen_values[arg_sort_out[i]] += 1
                     if debug is True:
-                        print 'specific', arg_sort_out[i], patch_acc_loss[arg_sort_out[i]], \
-                            patch_occur[arg_sort_out[i]], patch_mean[arg_sort_out[i]]
+                        print('specific', arg_sort_out[i], patch_acc_loss[arg_sort_out[i]], \
+                            patch_occur[arg_sort_out[i]], patch_mean[arg_sort_out[i]])
                     break
 
     if debug is True:
-        print 'Current patch size ', cur_val
+        print('Current patch size ', cur_val)
         if patch_chosen_values is not None:
-            print 'Distr of chosen sizes ', patch_chosen_values
+            print('Distr of chosen sizes ', patch_chosen_values)
 
     return cur_val
 
@@ -1074,23 +1033,19 @@ def test(sess, test_data, test_mask_data, mean_full, std_full, batch_size, x, y,
          logits, step, crop_size, path):
     stride_crop = int(math.floor(crop_size / 2.0))
 
-    for k in xrange(len(test_data)):
+    for k in range(len(test_data)):
         h, w, c = test_mask_data[k].shape
-        # all_size += h*w
 
-        # print (h-crop_size)%stride_crop, (h-crop_size)%stride_crop == 0, int(((h-crop_size)/stride_crop)) + 1,
-        #  int(((h-crop_size)/stride_crop)) + 2
         instaces_stride_h = (int(((h - crop_size) / stride_crop)) + 1 if ((h - crop_size) % stride_crop) == 0 else int(
             ((h - crop_size) / stride_crop)) + 2)
         instaces_stride_w = (int(((w - crop_size) / stride_crop)) + 1 if ((w - crop_size) % stride_crop) == 0 else int(
             ((w - crop_size) / stride_crop)) + 2)
-        # print instaces_stride_h, instaces_stride_w
         instaces_stride = instaces_stride_h * instaces_stride_w
 
         prob_im = np.zeros([h, w, NUM_CLASSES], dtype=np.float32)
         occur_im = np.zeros([h, w, NUM_CLASSES], dtype=np.uint32)
 
-        for i in xrange(0, (
+        for i in range(0, (
                     (instaces_stride / batch_size) + 1 if instaces_stride % batch_size != 0
                     else (instaces_stride / batch_size))):
             test_patches, test_classes, pos = create_patches_per_map(test_data[k], test_mask_data[k], crop_size,
@@ -1102,12 +1057,10 @@ def test(sess, test_data, test_mask_data, mean_full, std_full, batch_size, x, y,
 
             _pred_up, _logits = sess.run([pred_up, logits],
                                          feed_dict={x: bx, y: by, crop: crop_size, keep_prob: 1., is_training: False})
-            for j in xrange(len(_logits)):
-                # print pos[j][0], pos[j][0]+crop_size, pos[j][1], pos[j][1]+crop_size
+            for j in range(len(_logits)):
                 prob_im[int(pos[j][0]):int(pos[j][0]) + crop_size,
                 int(pos[j][1]):int(pos[j][1]) + crop_size,:] += _logits[j, :, :, :]
                 occur_im[int(pos[j][0]):int(pos[j][0]) + crop_size, int(pos[j][1]):int(pos[j][1]) + crop_size, :] += 1
-                # index += 1
 
         occur_im[np.where(occur_im == 0)] = 1
 
@@ -1117,15 +1070,15 @@ def test(sess, test_data, test_mask_data, mean_full, std_full, batch_size, x, y,
         save_map(path, step, prob_im_argmax)
 
         cm_test_per_map = np.zeros((NUM_CLASSES, NUM_CLASSES), dtype=np.uint32)
-        for t in xrange(h):
-            for r in xrange(w):
+        for t in range(h):
+            for r in range(w):
                 # print test_mask_data[k][t][r][0], prob_im_argmax[t][r]
                 cm_test_per_map[int(test_mask_data[k][t][r][0])][int(prob_im_argmax[t, r])] += 1
                 # all_cm_test[test_mask_data[k][t][r]][prob_im_argmax[t][r]] += 1
 
         _sum = 0.0
         total = 0
-        for i in xrange(len(cm_test_per_map)):
+        for i in range(len(cm_test_per_map)):
             _sum += (
                 cm_test_per_map[i][i] / float(np.sum(cm_test_per_map[i])) if np.sum(cm_test_per_map[i]) != 0 else 0)
             total += cm_test_per_map[i][i]
@@ -1266,7 +1219,7 @@ def main():
     elif net_type == 'dilated_icpr_rate6_squeeze':
         logits = dilated_icpr_rate6_squeeze(x, keep_prob, is_training, weight_decay, crop)
     else:
-        print BatchColors.FAIL + 'Net type not identified: ' + net_type + BatchColors.ENDC
+        print(BatchColors.FAIL + 'Net type not identified: ' + net_type + BatchColors.ENDC)
         return
 
     # Define loss and optimizer
@@ -1287,7 +1240,7 @@ def main():
     init = tf.initialize_all_variables()
 
     # Launch the graph
-    shuffle = np.asarray(random.sample(xrange(3 * total_length), 3 * total_length))
+    shuffle = np.asarray(random.sample(range(3 * total_length), 3 * total_length))
     current_iter = 1
 
     # gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.6)
@@ -1295,7 +1248,7 @@ def main():
     with tf.Session() as sess:
         if 'model' in current_model:
             current_iter = int(current_model.split('-')[-1])
-            print BatchColors.OKBLUE + 'Model restored from ' + current_model + BatchColors.ENDC
+            print(BatchColors.OKBLUE + 'Model restored from ' + current_model + BatchColors.ENDC)
             patch_acc_loss = np.load(output_path + 'errorAcc_step_' + str(current_iter) + '.npy')
             patch_occur = np.load(output_path + 'errorOccur_step_' + str(current_iter) + '.npy')
             patch_chosen_values = np.load(output_path + 'chosenValues_step_' + str(current_iter) + '.npy')
@@ -1303,7 +1256,7 @@ def main():
             saver_restore.restore(sess, current_model)
         else:
             sess.run(init)
-            print 'Model totally initialized!'
+            print('Model totally initialized!')
 
         # aux variables
         it = 0
@@ -1311,7 +1264,7 @@ def main():
         epoch_cm_train = np.zeros((NUM_CLASSES, NUM_CLASSES), dtype=np.uint32)
 
         # Keep training until reach max iterations
-        for step in xrange(current_iter, niter + 1):
+        for step in range(current_iter, niter + 1):
             if distribution_type == 'multi_fixed':
                 cur_size_int = np.random.randint(len(values))
                 cur_batch_size = int(values[cur_size_int])
@@ -1324,12 +1277,12 @@ def main():
             elif distribution_type == 'single_fixed':
                 cur_batch_size = int(values[0])
 
-            print cur_batch_size # cur_size_int
+            print(cur_batch_size) # cur_size_int
             # print 'new batch of crop size == ', cur_batch_size
             shuffle, batch, it = select_batch(shuffle, batch_size, it, 3 * total_length)
             if len(batch) != batch_size:
-                print BatchColors.FAIL + "Error: size of current batch " + str(len(batch)) + \
-                      " differs from batch_size " + str(batch_size) + BatchColors.ENDC
+                print(BatchColors.FAIL + "Error: size of current batch " + str(len(batch)) + \
+                      " differs from batch_size " + str(batch_size) + BatchColors.ENDC)
                 return
             b_x, b_y = dynamically_create_patches(training_data, training_mask_data, cur_batch_size, class_distribution,
                                                   batch)
@@ -1343,20 +1296,19 @@ def main():
                                                     feed_dict={x: batch_x, y: batch_y, crop: cur_batch_size,
                                                                keep_prob: dropout, is_training: True})
 
-            acc, batch_cm_train = calc_accuracy_by_crop(batch_y, batch_pred_up, epoch_cm_train)
+            acc, acc_norm, batch_cm_train = calc_accuracy_by_crop(batch_y, batch_pred_up, epoch_cm_train)
             epoch_mean += acc
 
             if distribution_type == 'multi_fixed' or distribution_type == 'uniform' \
                     or distribution_type == 'multinomial':
                 # print (batch_loss*(epoch/10.0) if update_type == 'loss' else (acc/float(np.sum(batch_cm_train))))
                 patch_acc_loss[cur_size_int] += (
-                    batch_loss if update_type == 'loss' else (acc / float(np.sum(batch_cm_train))))  # *(epoch/10.0)
-                # errorLoss[cur_size_int] += batch_loss*(epoch/10.0)
+                    batch_loss if update_type == 'loss' else acc_norm)  # (acc / float(np.sum(batch_cm_train)))
                 patch_occur[cur_size_int] += 1
 
             if step != 0 and step % display_step == 0:
                 _sum = 0.0
-                for i in xrange(len(batch_cm_train)):
+                for i in range(len(batch_cm_train)):
                     _sum += (batch_cm_train[i][i] / float(np.sum(batch_cm_train[i]))
                              if np.sum(batch_cm_train[i]) != 0 else 0)
 
@@ -1369,7 +1321,7 @@ def main():
 
             if step % epoch_number == 0:
                 _sum = 0.0
-                for i in xrange(len(epoch_cm_train)):
+                for i in range(len(epoch_cm_train)):
                     _sum += (epoch_cm_train[i][i] / float(np.sum(epoch_cm_train[i]))
                              if np.sum(epoch_cm_train[i]) != 0 else 0)
 
@@ -1410,8 +1362,7 @@ def main():
         # Test: Final
         if distribution_type == 'multi_fixed' or distribution_type == 'uniform' or distribution_type == 'multinomial':
             cur_val = select_best_patch_size(distribution_type, values, patch_acc_loss, patch_occur, update_type,
-                                            patch_chosen_values,
-                                            debug=True)
+                                            patch_chosen_values, debug=True)
         else:
             cur_val = int(values[0])
         test(sess, test_data, test_mask_data, mean_full, std_full, batch_size, x, y, crop, keep_prob, is_training,

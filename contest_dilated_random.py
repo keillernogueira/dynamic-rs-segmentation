@@ -24,24 +24,22 @@ class BatchColors:
 
 
 def print_params(list_params):
-    print '+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++'
-    for i in xrange(1, len(sys.argv)):
-        print list_params[i - 1] + '= ' + sys.argv[i]
-    print '+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++'
+    print('+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++')
+    for i in range(1, len(sys.argv)):
+        print(list_params[i - 1] + '= ' + sys.argv[i])
+    print('+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++')
 
 
 def select_batch(shuffle, batch_size, it, total_size):
     batch = shuffle[it:min(it + batch_size, total_size)]
     if min(it + batch_size, total_size) == total_size or total_size == it + batch_size:
-        shuffle = np.asarray(random.sample(xrange(total_size), total_size))
-        # print "in", shuffle
+        shuffle = np.asarray(random.sample(range(total_size), total_size))
         it = 0
         if len(batch) < batch_size:
             diff = batch_size - len(batch)
             batch_c = shuffle[it:it + diff]
             batch = np.concatenate((batch, batch_c))
             it = diff
-            # print 'c', batch_c, batch, it
     else:
         it += batch_size
     return shuffle, batch, it
@@ -65,7 +63,7 @@ def convert_class(value):
     elif value == 0:
         c = 7
     else:
-        print BatchColors.FAIL + "Pixel to class did not find combination!!! " + value + BatchColors.ENDC
+        print(BatchColors.FAIL + "Pixel to class did not find combination!!! " + value + BatchColors.ENDC)
         return -1
 
     return c
@@ -78,7 +76,7 @@ def define_multinomial_probs(values, dif_prob=2):
     maxProb = generalProb * dif_prob
 
     probs = np.full(interval_size, (1.0 - maxProb * len(values)) / float(interval_size - len(values)))
-    for i in xrange(len(values)):
+    for i in range(len(values)):
         probs[values[i] - values[0]] = maxProb
 
     return probs
@@ -103,14 +101,14 @@ def compute_image_mean(data):
 
 def create_mean_and_std(data, class_distribution, crop_size):
     all_patches = []
-    for i in xrange(len(class_distribution)):
+    for i in range(len(class_distribution)):
         cur_x = class_distribution[i][0]
         cur_y = class_distribution[i][1]
 
         patches = data[cur_x:cur_x + crop_size, cur_y:cur_y + crop_size, :]
         if len(patches[0]) != crop_size or len(patches[1]) != crop_size:
-            print BatchColors.FAIL + "Error! Current patch size: " + str(len(patches)) + "x" + \
-                  str(len(patches[0])) + BatchColors.ENDC
+            print(BatchColors.FAIL + "Error! Current patch size: " + str(len(patches)) + "x" + \
+                  str(len(patches[0])) + BatchColors.ENDC)
             return
 
         all_patches.append(patches)
@@ -155,7 +153,7 @@ def load_imgs_torch(f, is_train, mask_size):
     try:
         file_in = open(f)
     except IOError:
-        print BatchColors.FAIL + "Could not open file " + str(f) + BatchColors.ENDC
+        print(BatchColors.FAIL + "Could not open file " + str(f) + BatchColors.ENDC)
 
     for line in file_in:
         if i == 7:
@@ -176,8 +174,8 @@ def create_distributions_over_classes(labels, crop_size, stride_crop):
 
     w, h = labels.shape
 
-    for i in xrange(0, w, stride_crop):
-        for j in xrange(0, h, stride_crop):
+    for i in range(0, w, stride_crop):
+        for j in range(0, h, stride_crop):
             patch_class = labels[i:i + crop_size, j:j + crop_size]
 
             if patch_class.shape == (crop_size, crop_size):
@@ -186,8 +184,8 @@ def create_distributions_over_classes(labels, crop_size, stride_crop):
                     continue
                 classes[np.argmax(count[:-1])].append((i, j))
 
-    for i in xrange(len(classes)):
-        print "Class " + str(i + 1) + " has " + str(len(classes[i])) + " instances"
+    for i in range(len(classes)):
+        print("Class " + str(i + 1) + " has " + str(len(classes[i])) + " instances")
     return classes[0] + classes[1] + classes[2] + classes[3] + classes[4] + classes[5] + classes[6]
 
 
@@ -224,14 +222,14 @@ def dynamically_create_patches(data, mask_data, crop_size, class_distribution, s
                                       cur_y - (crop_size - len(current_class[0])):cur_y + crop_size]
 
         if len(patch) != crop_size or len(patch[0]) != crop_size:
-            print BatchColors.FAIL + "Error: Current patch size " + str(len(patch)) + " x " \
-                  + str(len(patch[0])) + BatchColors.ENDC
-            print cur_x, (crop_size - len(patch)), cur_x - (crop_size - len(patch)), cur_x + crop_size, cur_y, (
-                crop_size - len(patch[0])), cur_y - (crop_size - len(patch[0])), cur_y + crop_size
+            print(BatchColors.FAIL + "Error: Current patch size " + str(len(patch)) + " x " \
+                  + str(len(patch[0])) + BatchColors.ENDC)
+            print(cur_x, (crop_size - len(patch)), cur_x - (crop_size - len(patch)), cur_x + crop_size, cur_y, (
+                crop_size - len(patch[0])), cur_y - (crop_size - len(patch[0])), cur_y + crop_size)
             return
         if len(current_class) != crop_size or len(current_class[0]) != crop_size:
-            print BatchColors.FAIL + "Error: Current class size " + str(len(current_class)) + " x " \
-                  + str(len(current_class[0])) + BatchColors.ENDC
+            print(BatchColors.FAIL + "Error: Current class size " + str(len(current_class)) + " x " \
+                  + str(len(current_class[0])) + BatchColors.ENDC)
             return
 
         # MASKS
@@ -280,18 +278,15 @@ def create_patches_per_map(data, mask_data, crop_size, stride_crop, index, batch
 
     # print total_index_h, total_index_w, offset_h, offset_w, index
 
-    for j in xrange(offset_h, total_index_h * stride_crop, stride_crop):
-        if first == False:
+    for j in range(offset_h, total_index_h * stride_crop, stride_crop):
+        if first is False:
             offset_w = 0
-        for k in xrange(offset_w, total_index_w * stride_crop, stride_crop):
-            if first == True:
+        for k in range(offset_w, total_index_w * stride_crop, stride_crop):
+            if first is True:
                 first = False
             cur_x = j
             cur_y = k
-            # print j,total_index_h*stride_crop
-            # print k,total_index_w*stride_crop
 
-            # print cur_x, cur_y, cur_x+crop_size, cur_y+crop_size, data[cur_x:cur_x+crop_size, cur_y:cur_y+crop_size,:].shape
             patch = data[cur_x:cur_x + crop_size, cur_y:cur_y + crop_size, :]
 
             if len(patch) != crop_size and len(patch[0]) != crop_size:
@@ -306,16 +301,15 @@ def create_patches_per_map(data, mask_data, crop_size, stride_crop, index, batch
                 patch = data[cur_x:cur_x + crop_size, cur_y:cur_y + crop_size, :]
 
             if len(patch) != crop_size or len(patch[0]) != crop_size:
-                print "Error: Current patch size ", len(patch), len(patch[0])
+                print("Error: Current patch size ", len(patch), len(patch[0]))
 
             count += 1
             patches.append(patch)
-            curMaskPatch = mask_data[cur_x:cur_x + crop_size, cur_y:cur_y + crop_size]
-            classes.append(curMaskPatch)
-            # print cur_x, cur_y, cur_x+crop_size, cur_y+crop_size, patch.shape, curMaskPatch.shape
+            cur_mask_patch = mask_data[cur_x:cur_x + crop_size, cur_y:cur_y + crop_size]
+            classes.append(cur_mask_patch)
 
             # MASKS
-            current_mask = np.copy(curMaskPatch)
+            current_mask = np.copy(cur_mask_patch)
             current_mask[current_mask == 0] = 8
             current_mask[current_mask == 7] = 0
             current_mask = current_mask.astype(bool)
@@ -339,25 +333,28 @@ def calc_cccuracy_by_crop(true, pred, mask, track_conf_matrix):
 
     acc = 0
     local_conf_matrix = np.zeros((NUM_CLASSES, NUM_CLASSES), dtype=np.uint32)
-    for i in xrange(b):
-        for j in xrange(h):
-            for k in xrange(w):
-                if mask[i, j, k] == True:
+    for i in range(b):
+        for j in range(h):
+            for k in range(w):
+                if mask[i, j, k] is True:
                     if true[i][j][k] == pred[i][j][k]:
                         acc = acc + 1
                     track_conf_matrix[true[i, j, k]][pred[i, j, k]] += 1
                     local_conf_matrix[true[i, j, k]][pred[i, j, k]] += 1
 
-    return acc, local_conf_matrix
+    _sum = 0.0
+    for i in range(len(local_conf_matrix)):
+        _sum += (local_conf_matrix[i][i] / float(np.sum(local_conf_matrix[i])) if np.sum(local_conf_matrix[i]) != 0 else 0)
+    acc_norm = _sum / float(NUM_CLASSES)
+
+    return acc, acc_norm, local_conf_matrix
 
 
 def select_best_patch_size(distribution_type, values, patch_acc_loss, patch_occur, is_loss_or_acc='acc',
                            patch_chosen_values=None,
                            debug=False):
-    # if 0 in patch_occur:
     patch_occur[np.where(patch_occur == 0)] = 1
     patch_mean = patch_acc_loss / patch_occur
-    # print is_loss_or_acc
 
     if is_loss_or_acc == 'acc':
         argmax_acc = np.argmax(patch_mean)
@@ -370,53 +367,51 @@ def select_best_patch_size(distribution_type, values, patch_acc_loss, patch_occu
             patch_chosen_values[int(argmax_acc)] += 1
 
         if debug is True:
-            print 'patch_acc_loss', patch_acc_loss
-            print 'patch_occur', patch_occur
-            print 'patch_mean', patch_mean
-            print 'argmax_acc', argmax_acc
+            print('patch_acc_loss', patch_acc_loss)
+            print('patch_occur', patch_occur)
+            print('patch_mean', patch_mean)
+            print('argmax_acc', argmax_acc)
 
-            print 'specific', argmax_acc, patch_acc_loss[argmax_acc], patch_occur[argmax_acc], patch_mean[argmax_acc]
+            print('specific', argmax_acc, patch_acc_loss[argmax_acc], patch_occur[argmax_acc], patch_mean[argmax_acc])
 
     elif is_loss_or_acc == 'loss':
         arg_sort_out = np.argsort(patch_mean)
 
         if debug is True:
-            print 'patch_acc_loss', patch_acc_loss
-            print 'patch_occur', patch_occur
-            print 'patch_mean', patch_mean
-            print 'arg_sort_out', arg_sort_out
+            print('patch_acc_loss', patch_acc_loss)
+            print('patch_occur', patch_occur)
+            print('patch_mean', patch_mean)
+            print('arg_sort_out', arg_sort_out)
         if distribution_type == 'multi_fixed':
-            for i in xrange(len(values)):
+            for i in range(len(values)):
                 if patch_occur[arg_sort_out[i]] > 0:
                     cur_patch_val = int(values[arg_sort_out[i]])  # -1*(i+1)
                     if patch_chosen_values is not None:
                         patch_chosen_values[arg_sort_out[i]] += 1
                     if debug is True:
-                        print 'specific', arg_sort_out[i], patch_acc_loss[arg_sort_out[i]], patch_occur[
-                            arg_sort_out[i]], patch_mean[arg_sort_out[i]]
+                        print('specific', arg_sort_out[i], patch_acc_loss[arg_sort_out[i]], patch_occur[
+                            arg_sort_out[i]], patch_mean[arg_sort_out[i]])
                     break
         elif distribution_type == 'uniform' or distribution_type == 'multinomial':
-            for i in xrange(values[-1] - values[0] + 1):
+            for i in range(values[-1] - values[0] + 1):
                 if patch_occur[arg_sort_out[i]] > 0:
                     cur_patch_val = values[0] + arg_sort_out[i]
                     if patch_chosen_values is not None:
                         patch_chosen_values[arg_sort_out[i]] += 1
                     if debug is True:
-                        print 'specific', arg_sort_out[i], patch_acc_loss[arg_sort_out[i]], patch_occur[
-                            arg_sort_out[i]], patch_mean[arg_sort_out[i]]
+                        print('specific', arg_sort_out[i], patch_acc_loss[arg_sort_out[i]], patch_occur[
+                            arg_sort_out[i]], patch_mean[arg_sort_out[i]])
                     break
 
     if debug is True:
-        print 'Current patch size ', cur_patch_val
+        print('Current patch size ', cur_patch_val)
         if patch_chosen_values is not None:
-            print 'Distr of chosen sizes ', patch_chosen_values
+            print('Distr of chosen sizes ', patch_chosen_values)
 
     return cur_patch_val
 
 
 def class_to_color(value):
-    # [255,0,255],[0,255,0],[255,0,0],[0,255,255],[160,32,240],[46,139,87],[255,255,0]
-
     if value == 0:
         return (255, 0, 255)
     elif value == 1:
@@ -432,20 +427,20 @@ def class_to_color(value):
     elif value == 6:
         return (255, 255, 0)
     else:
-        print BatchColors.FAIL + "Class did not find: " + str(value) + BatchColors.ENDC
+        print(BatchColors.FAIL + "Class did not find: " + str(value) + BatchColors.ENDC)
 
 
 def create_prediction_map(path, prob_img, mask, step):
     img = Image.new("RGB", (3769, 4386), "black")
     pixels = img.load()
-    for i in xrange(3769):
-        for j in xrange(4386):
+    for i in range(3769):
+        for j in range(4386):
             if mask[j, i] != 7:
                 pixels[i, j] = class_to_color(int(prob_img[j, i]))
             else:
                 prob_img[j, i] = 7
 
-    img.save(path + 'predMap_' + str(step) + '.jpeg')
+    img.save(path + 'pred_map_' + str(step) + '.jpeg')
 
 
 '''
@@ -912,19 +907,16 @@ def test(sess, test_data, test_mask_data, mean_full, std_full, batch_size, x, y,
 
     h, w = test_mask_data.shape
 
-    # print (h-crop_size)%stride_crop, (h-crop_size)%stride_crop == 0, int(((h-crop_size)/stride_crop)) + 1
-    #  int(((h-crop_size)/stride_crop)) + 2
     instaces_stride_h = (int(((h - crop_size) / stride_crop)) + 1 if ((h - crop_size) % stride_crop) == 0 else int(
                         ((h - crop_size) / stride_crop)) + 2)
     instaces_stride_w = (int(((w - crop_size) / stride_crop)) + 1 if ((w - crop_size) % stride_crop) == 0 else int(
                         ((w - crop_size) / stride_crop)) + 2)
-    # print instaces_stride_h, instaces_stride_w
     instaces_stride = instaces_stride_h * instaces_stride_w
 
     prob_im = np.zeros([h, w, NUM_CLASSES], dtype=np.float32)
     occur_im = np.zeros([h, w, NUM_CLASSES], dtype=np.uint32)
 
-    for i in xrange(0, (
+    for i in range(0, (
                 (instaces_stride / batch_size) + 1 if instaces_stride % batch_size != 0 else (instaces_stride / batch_size))):
         test_patches, test_classes, test_masks, pos = create_patches_per_map(test_data, test_mask_data, crop_size,
                                                                              stride_crop, i, batch_size)
@@ -937,7 +929,7 @@ def test(sess, test_data, test_mask_data, mean_full, std_full, batch_size, x, y,
         _pred_up, _logits = sess.run([pred_up, logits],
                                      feed_dict={x: bx, y: by, mask: batch_mask, crop: crop_size, keep_prob: 1.,
                                                 is_training: False})
-        for j in xrange(len(_logits)):
+        for j in range(len(_logits)):
             prob_im[int(pos[j][0]):int(pos[j][0]) + crop_size, int(pos[j][1]):int(pos[j][1]) + crop_size, :] += \
                 _logits[j, :, :, :]
             occur_im[int(pos[j][0]):int(pos[j][0]) + crop_size, int(pos[j][1]):int(pos[j][1]) + crop_size, :] += 1
@@ -950,14 +942,14 @@ def test(sess, test_data, test_mask_data, mean_full, std_full, batch_size, x, y,
     # create_prediction_map(path, prob_im_argmax, test_mask_data, step)
 
     cm_test_per_map = np.zeros((NUM_CLASSES, NUM_CLASSES), dtype=np.uint32)
-    for t in xrange(h):
-        for r in xrange(w):
+    for t in range(h):
+        for r in range(w):
             if int(test_mask_data[t, r]) != 7:
                 cm_test_per_map[int(test_mask_data[t, r])][int(prob_im_argmax[t, r])] += 1
 
     _sum = 0.0
     total = 0
-    for i in xrange(len(cm_test_per_map)):
+    for i in range(len(cm_test_per_map)):
         _sum += (cm_test_per_map[i][i] / float(np.sum(cm_test_per_map[i])) if np.sum(cm_test_per_map[i]) != 0 else 0)
         total += cm_test_per_map[i][i]
 
@@ -1000,7 +992,7 @@ def train(training_data, training_mask_data, test_data, test_mask_data, class_di
     is_training = tf.placeholder(tf.bool, [], name='is_training')
     global_step = tf.Variable(0, name='global_step', trainable=False)
 
-    # CONVNET
+    # ConvNets
     if net_type == 'dilated_icpr_old':
         logits = dilated_icpr_old(x, keep_prob, is_training, weight_decay, crop)
     elif net_type == 'dilated_grsl_old':
@@ -1020,7 +1012,7 @@ def train(training_data, training_mask_data, test_data, test_mask_data, class_di
     elif net_type == 'dilated_icpr_rate6_squeeze':
         logits = dilated_icpr_rate6_squeeze(x, keep_prob, is_training, weight_decay, crop)
     else:
-        print BatchColors.FAIL + 'Net type not identified: ' + net_type + BatchColors.ENDC
+        print(BatchColors.FAIL + 'Net type not identified: ' + net_type + BatchColors.ENDC)
         return
 
     # Define loss and optimizer
@@ -1041,7 +1033,7 @@ def train(training_data, training_mask_data, test_data, test_mask_data, class_di
     init = tf.initialize_all_variables()
 
     # Launch the graph
-    shuffle = np.asarray(random.sample(xrange(3 * total_length), 3 * total_length))
+    shuffle = np.asarray(random.sample(range(3 * total_length), 3 * total_length))
     epoch = 1
     current_iter = 1
 
@@ -1053,10 +1045,10 @@ def train(training_data, training_mask_data, test_data, test_mask_data, class_di
                 patch_acc_loss = np.load(output_path + 'patch_acc_loss_step_' + str(current_iter) + '.npy')
                 patch_occur = np.load(output_path + 'patch_occur_step_' + str(current_iter) + '.npy')
                 patch_chosen_values = np.load(output_path + 'patch_chosen_values_step_' + str(current_iter) + '.npy')
-            print BatchColors.OKGREEN + 'Model restored from ' + current_model + '!' + BatchColors.ENDC
+            print(BatchColors.OKGREEN + 'Model restored from ' + current_model + '!' + BatchColors.ENDC)
         else:
             sess.run(init)
-            print BatchColors.OKGREEN + 'Model totally initialized!' + BatchColors.ENDC
+            print(BatchColors.OKGREEN + 'Model totally initialized!' + BatchColors.ENDC)
 
         # aux variables
         it = 0
@@ -1093,17 +1085,17 @@ def train(training_data, training_mask_data, test_data, test_mask_data, class_di
                                                                crop: cur_patch_size, keep_prob: dropout,
                                                                is_training: True})
 
-            acc, batch_cm_train = calc_cccuracy_by_crop(b_y, batch_pred_up, b_m, epoch_cm_train)
+            acc, acc_norm, batch_cm_train = calc_cccuracy_by_crop(b_y, batch_pred_up, b_m, epoch_cm_train)
             epoch_mean += acc
 
             if distribution_type == 'multi_fixed' or distribution_type == 'uniform' or distribution_type == 'multinomial':
                 patch_acc_loss[cur_size_int] += (
-                    batch_loss if update_type == 'loss' else (acc / float(np.sum(batch_cm_train))))
+                    batch_loss if update_type == 'loss' else acc_norm)  # (acc / float(np.sum(batch_cm_train)))
                 patch_occur[cur_size_int] += 1
 
             if step % display_step == 0:
                 _sum = 0.0
-                for i in xrange(len(batch_cm_train)):
+                for i in range(len(batch_cm_train)):
                     _sum += batch_cm_train[i][i] / float(np.sum(batch_cm_train[i]))
 
                 print("Iter " + str(step) + " -- Time " + str(datetime.datetime.now().time()) +
@@ -1117,7 +1109,7 @@ def train(training_data, training_mask_data, test_data, test_mask_data, class_di
             if step % epoch_number == 0:
 
                 _sum = 0.0
-                for i in xrange(len(batch_cm_train)):
+                for i in range(len(batch_cm_train)):
                     _sum += epoch_cm_train[i][i] / float(np.sum(epoch_cm_train[i]))
 
                 print("-- Iter " + str(step) + " -- Training Epoch:" +
@@ -1148,7 +1140,7 @@ def train(training_data, training_mask_data, test_data, test_mask_data, class_di
 
             if min(it * batch_size + batch_size,
                    3 * total_length) == 3 * total_length or 3 * total_length == it * batch_size + batch_size:
-                shuffle = np.asarray(random.sample(xrange(3 * total_length), 3 * total_length))
+                shuffle = np.asarray(random.sample(range(3 * total_length), 3 * total_length))
                 epoch += 1
                 it = -1
             it += 1
@@ -1202,7 +1194,7 @@ def test_from_model(test_data, test_mask_data,
     elif net_type == 'dilated_icpr_rate6_squeeze':
         logits = dilated_icpr_rate6_squeeze(x, keep_prob, is_training, weight_decay, crop)
     else:
-        print BatchColors.FAIL + 'Net type not identified: ' + net_type + BatchColors.ENDC
+        print(BatchColors.FAIL + 'Net type not identified: ' + net_type + BatchColors.ENDC)
         return
 
     # Evaluate model
@@ -1216,7 +1208,7 @@ def test_from_model(test_data, test_mask_data,
         saver_restore.restore(sess, current_model)
         patch_acc_loss = np.load(output_path + 'patch_acc_loss_step_' + str(current_iter) + '.npy')
         patch_occur = np.load(output_path + 'patch_occur_step_' + str(current_iter) + '.npy')
-        print BatchColors.OKGREEN + 'Model restored from ' + current_model + '!' + BatchColors.ENDC
+        print(BatchColors.OKGREEN + 'Model restored from ' + current_model + '!' + BatchColors.ENDC)
 
         if distribution_type == 'multi_fixed' or distribution_type == 'uniform' or distribution_type == 'multinomial':
             cur_val = select_best_patch_size(distribution_type, values, patch_acc_loss, patch_occur,
@@ -1318,7 +1310,7 @@ def main():
                         weight_decay, batch_size, net_type,
                         distribution_type, update_type, values)
     else:
-        print BatchColors.FAIL + "Process " + operation + "not found!" + BatchColors.ENDC
+        print(BatchColors.FAIL + "Process " + operation + "not found!" + BatchColors.ENDC)
 
 if __name__ == "__main__":
     main()
